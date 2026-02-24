@@ -25,3 +25,14 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* ให้ตัวอักษรในช่องกรอกมองเห็นชัดทุกหน้า (แก้เมื่อใช้ dark mode) */
+input,
+textarea,
+select {
+  color: #111827; /* gray-900 */
+}
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280; /* gray-500 */
+}

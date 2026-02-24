@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ระบบจองห้องพักโฮมสเตย์
 
-## Getting Started
+เว็บแอป Next.js + Prisma (SQLite) สำหรับจองห้องพักโฮมสเตย์
 
-First, run the development server:
+## สิ่งที่มีในระบบ
+
+- **หน้าหลัก** — แสดงรายการห้องพัก
+- **หน้ารายละเอียดห้อง** — ดูข้อมูลห้อง + ฟอร์มจอง (เช็คอิน/เช็คเอาท์, ชื่อ, อีเมล, โทร)
+- **ตรวจวันซ้อน** — ไม่ให้จองช่วงวันที่ชนกับรายการเดิม
+- **หลังจองสำเร็จ** — ไปหน้า success แสดงรหัสการจอง
+- **แอดมิน** — เพิ่ม/แก้ไข/ลบห้อง (`/admin/rooms`)
+
+## วิธีรัน
 
 ```bash
+cd D:\homestay-booking
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิดเบราว์เซอร์ที่ **http://localhost:3000** (หรือ 3001 ถ้าพอร์ต 3000 ถูกใช้)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ฐานข้อมูล
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- ใช้ SQLite ไฟล์ `prisma/dev.db`
+- สร้างตาราง: `npm run db:push`
+- ใส่ข้อมูลตัวอย่าง: `npm run db:seed`
 
-## Learn More
+## ขั้นตอนถัดไป (ถ้าต้องการ)
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+1. **อัปเกรด Node** เป็น 20+ แล้วค่อยอัป Prisma/Next เป็นรุ่นล่าสุด (ตอนนี้ใช้ Node 18 จึงใช้ Next 13 + Prisma 5)
+2. **ล็อกอินแอดมิน** — เพิ่ม auth (เช่น NextAuth) แล้วป้องกัน `/admin` และ `/api/admin`
+3. **อีเมลยืนยัน** — ส่งอีเมลหลังจอง (Resend, Nodemailer ฯลฯ)
+4. **อัปโหลดรูป** — เก็บรูปห้องใน storage (เช่น S3, Cloudinary) แทน URL อย่างเดียว
