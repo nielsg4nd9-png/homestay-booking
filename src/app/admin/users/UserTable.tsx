@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { User } from '@prisma/client'
 import type { Role } from '@/lib/auth'
 import { ROLES } from '@/lib/auth'
+import { AdminTableCard } from '@/components/admin/AdminUI'
 
 type UserForTable = Pick<User, 'id' | 'name' | 'email' | 'role' | 'createdAt'>
 
@@ -34,23 +35,27 @@ export function UserTable({ initialUsers }: { initialUsers: UserForTable[] }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <AdminTableCard>
       <div className="overflow-x-auto">
-      <table className="w-full text-sm min-w-[400px]">
+      <table className="w-full text-sm min-w-[620px]">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
-            <th className="text-left py-3 px-4 font-medium text-gray-700">อีเมล</th>
-            <th className="text-left py-3 px-4 font-medium text-gray-700">ชื่อ</th>
-            <th className="text-left py-3 px-4 font-medium text-gray-700">Role</th>
-            <th className="text-left py-3 px-4 font-medium text-gray-700">สร้างเมื่อ</th>
+            <th className="text-left py-3.5 px-5 font-medium text-gray-700 whitespace-nowrap">อีเมล</th>
+            <th className="text-left py-3.5 px-5 font-medium text-gray-700 whitespace-nowrap">ชื่อ</th>
+            <th className="text-left py-3.5 px-5 font-medium text-gray-700 whitespace-nowrap">Role</th>
+            <th className="text-left py-3.5 px-5 font-medium text-gray-700 whitespace-nowrap">สร้างเมื่อ</th>
           </tr>
         </thead>
         <tbody>
           {users.map((u) => (
-            <tr key={u.id} className="border-b border-gray-50">
-              <td className="py-2.5 px-4 text-gray-800">{u.email}</td>
-              <td className="py-2.5 px-4 text-gray-600">{u.name || '-'}</td>
-              <td className="py-2.5 px-4">
+            <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50/60">
+              <td className="py-3 px-5 text-gray-800 whitespace-nowrap">
+                <span className="inline-block max-w-[260px] truncate align-bottom" title={u.email}>
+                  {u.email}
+                </span>
+              </td>
+              <td className="py-3 px-5 text-gray-600 whitespace-nowrap">{u.name || '-'}</td>
+              <td className="py-3 px-5 whitespace-nowrap">
                 <select
                   value={u.role as Role}
                   onChange={(e) => handleRoleChange(u.id, e.target.value as Role)}
@@ -64,7 +69,7 @@ export function UserTable({ initialUsers }: { initialUsers: UserForTable[] }) {
                   ))}
                 </select>
               </td>
-              <td className="py-2.5 px-4 text-gray-500">
+              <td className="py-3 px-5 text-gray-500 whitespace-nowrap">
                 {new Date(u.createdAt).toLocaleString('th-TH')}
               </td>
             </tr>
@@ -76,7 +81,7 @@ export function UserTable({ initialUsers }: { initialUsers: UserForTable[] }) {
         <div className="py-8 text-center text-gray-500 text-sm">ยังไม่มีผู้ใช้ในระบบ</div>
       )}
       {error && <div className="px-4 py-2 text-sm text-red-600 border-t border-red-100 bg-red-50">{error}</div>}
-    </div>
+    </AdminTableCard>
   )
 }
 

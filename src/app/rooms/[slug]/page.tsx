@@ -2,9 +2,10 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
-import { formatPrice, normalizeImageUrl, parseAmenities } from '@/lib/utils'
+import { formatPrice, parseAmenities } from '@/lib/utils'
 import { BookingForm } from './BookingForm'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { RoomImage } from '@/components/RoomImage'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,22 +15,16 @@ export default async function RoomPage({ params }: { params: { slug: string } })
   if (!room) notFound()
 
   const amenities = parseAmenities(room.amenities)
-  const imageSrc = normalizeImageUrl(room.imageUrl)
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="container mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
         <div className="aspect-[16/9] bg-gray-200">
-          {imageSrc ? (
-            <img src={imageSrc} alt={room.name} className="w-full h-full object-cover" />
-          ) : (
-            <div
-              className="w-full h-full bg-cover bg-center"
-              style={{
-                backgroundImage: `url(https://placehold.co/800x450/e8f5e9/2e7d32?text=${encodeURIComponent(room.name)})`,
-              }}
-            />
-          )}
+          <RoomImage
+            imageUrl={room.imageUrl}
+            roomName={room.name}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="p-6 md:p-8">
           <h1 className="text-2xl font-bold text-gray-800">{room.name}</h1>
@@ -63,11 +58,11 @@ export default async function RoomPage({ params }: { params: { slug: string } })
             defaultGuestEmail={session.user?.email ?? undefined}
           />
         ) : (
-          <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm text-center">
+          <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-sm text-center">
             <p className="text-gray-600 mb-4">กรุณาเข้าสู่ระบบเพื่อทำการจองห้อง</p>
             <Link
               href={`/login?callbackUrl=${encodeURIComponent(`/rooms/${params.slug}`)}`}
-              className="inline-block py-2.5 px-5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition"
+              className="inline-block rounded-lg bg-emerald-600 px-5 py-2.5 font-medium text-white shadow-sm hover:bg-emerald-700 transition"
             >
               เข้าสู่ระบบ
             </Link>

@@ -1,3 +1,10 @@
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 export function formatPrice(baht: number): string {
   return new Intl.NumberFormat('th-TH', {
     style: 'decimal',
@@ -9,6 +16,7 @@ export function normalizeImageUrl(imageUrl: string | null | undefined): string |
   if (!imageUrl) return null
   const u = imageUrl.trim()
   if (!u) return null
+  if (/^(data:|blob:)/i.test(u)) return u
   if (/^https?:\/\//i.test(u)) return u
   if (u.startsWith('/')) return u
   return `/${u}`

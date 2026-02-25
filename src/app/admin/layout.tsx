@@ -40,6 +40,18 @@ export default async function AdminLayout({
             รายการจอง
           </Link>
           <Link
+            href="/admin/services"
+            className="shrink-0 px-3 py-2.5 md:py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-none md:rounded-lg transition"
+          >
+            สินค้าและบริการ
+          </Link>
+          <Link
+            href="/admin/slides"
+            className="shrink-0 px-3 py-2.5 md:py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-none md:rounded-lg transition"
+          >
+            สไลด์หน้าแรก
+          </Link>
+          <Link
             href="/admin/users"
             className="shrink-0 px-3 py-2.5 md:py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-none md:rounded-lg transition"
           >

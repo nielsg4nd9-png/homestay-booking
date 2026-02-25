@@ -10,7 +10,6 @@ const bodySchema = z.object({
   checkIn: z.string(),
   checkOut: z.string(),
   guestName: z.string().min(1),
-  guestEmail: z.string().email(),
   guestPhone: z.string().optional(),
   guests: z.number().int().min(1).optional(),
 })
@@ -33,7 +32,7 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    const { roomId, checkIn, checkOut, guestName, guestEmail, guestPhone, guests } = parsed.data
+    const { roomId, checkIn, checkOut, guestName, guestPhone, guests } = parsed.data
 
     const checkInDate = new Date(checkIn)
     const checkOutDate = new Date(checkOut)
@@ -74,13 +73,22 @@ export async function POST(request: Request) {
     const nights = Math.max(1, differenceInDays(checkOutDate, checkInDate))
     const totalPrice = room.pricePerNight * nights
 
+    const sessionEmail = session.user?.email?.trim()
+    if (!sessionEmail) {
+      return NextResponse.json(
+        { error: 'ไม่พบอีเมลในบัญชีผู้ใช้ กรุณาเข้าสู่ระบบใหม่' },
+        { status: 400 }
+      )
+    }
+    const finalGuestName = session.user?.name?.trim() || guestName
+
     const booking = await prisma.booking.create({
       data: {
         roomId,
         checkIn: checkInDate,
         checkOut: checkOutDate,
-        guestName,
-        guestEmail,
+        guestName: finalGuestName,
+        guestEmail: sessionEmail,
         guestPhone: guestPhone || null,
         guests: numGuests,
         totalPrice,

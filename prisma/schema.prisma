@@ -46,9 +46,46 @@ model Booking {
   checkOut  DateTime
   guests    Int      @default(1)
   totalPrice Int?
+  depositPaid Boolean @default(false)
+  depositPaidAt DateTime?
+  depositSlipUrl String?
+  depositSlipSubmittedAt DateTime?
+  depositVerificationStatus String @default("NONE") // 'NONE' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
+  depositReviewedAt DateTime?
+  depositReviewNote String?
   note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([roomId, checkIn, checkOut])
+}
+
+model ServiceItem {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  type        String   @default("SERVICE") // 'SERVICE' | 'PRODUCT'
+  description String?
+  imageUrl    String?
+  price       Int?     // บาท
+  unit        String?  // เช่น แก้ว, ชุด, ทริป
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type, isActive, sortOrder])
+}
+
+model HeroSlide {
+  id        String   @id @default(cuid())
+  title     String?
+  subtitle  String?
+  imageUrl  String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }

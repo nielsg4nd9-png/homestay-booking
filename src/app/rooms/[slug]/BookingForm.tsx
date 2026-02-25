@@ -16,8 +16,16 @@ export function BookingForm({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
 
   const today = new Date().toISOString().slice(0, 10)
+  const pricePerNight = room.pricePerNight
+
+  const nights = getNights(checkIn, checkOut)
+  const totalPrice = nights > 0 ? nights * pricePerNight : null
+  const deposit = totalPrice != null ? Math.round(totalPrice * 0.5) : null
+  const remaining = totalPrice != null && deposit != null ? totalPrice - deposit : null
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -27,12 +35,11 @@ export function BookingForm({
     const checkIn = formData.get('checkIn') as string
     const checkOut = formData.get('checkOut') as string
     const guestName = formData.get('guestName') as string
-    const guestEmail = formData.get('guestEmail') as string
     const guestPhone = (formData.get('guestPhone') as string) || ''
     const guests = parseInt(formData.get('guests') as string, 10) || 1
 
-    if (!checkIn || !checkOut || !guestName.trim() || !guestEmail.trim()) {
-      setError('กรุณากรอกชื่อ อีเมล และวันเช็คอิน-เช็คเอาท์')
+    if (!checkIn || !checkOut || !guestName.trim()) {
+      setError('กรุณากรอกชื่อ และวันเช็คอิน-เช็คเอาท์')
       return
     }
     if (new Date(checkOut) <= new Date(checkIn)) {
@@ -54,7 +61,7 @@ export function BookingForm({
           checkIn,
           checkOut,
           guestName: guestName.trim(),
-          guestEmail: guestEmail.trim(),
+          // guestEmail จะยึดตามบัญชีที่ล็อกอินจากฝั่งเซิร์ฟเวอร์
           guestPhone: guestPhone.trim() || undefined,
           guests,
         }),
@@ -87,6 +94,8 @@ export function BookingForm({
             name="checkIn"
             min={today}
             required
+            value={checkIn}
+            onChange={(e) => setCheckIn(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
@@ -97,10 +106,29 @@ export function BookingForm({
             name="checkOut"
             min={today}
             required
+            value={checkOut}
+            onChange={(e) => setCheckOut(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
       </div>
+      {totalPrice != null && deposit != null && remaining != null && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+          <p className="font-medium">สรุปค่าบริการโดยประมาณ</p>
+          <p className="mt-1">
+            จำนวนคืน: <span className="font-semibold">{nights}</span> คืน
+          </p>
+          <p>
+            ยอดรวม: <span className="font-semibold">{new Intl.NumberFormat('th-TH').format(totalPrice)} บาท</span>
+          </p>
+          <p>
+            มัดจำ 50%: <span className="font-semibold">{new Intl.NumberFormat('th-TH').format(deposit)} บาท</span>
+          </p>
+          <p>
+            คงเหลือ: <span className="font-semibold">{new Intl.NumberFormat('th-TH').format(remaining)} บาท</span>
+          </p>
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">จำนวนผู้เข้าพัก</label>
         <input
@@ -128,11 +156,13 @@ export function BookingForm({
         <input
           type="email"
           name="guestEmail"
-          required
           placeholder="email@example.com"
           defaultValue={defaultGuestEmail}
+          disabled
+          readOnly
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
         />
+        <p className="mt-1 text-xs text-gray-500">อีเมลจะยึดจากบัญชีที่ล็อกอิน</p>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">เบอร์โทร</label>
@@ -143,6 +173,11 @@ export function BookingForm({
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
         />
       </div>
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="font-medium">การชำระค่าบริการ</p>
+        <p className="mt-1">1) ค่ามัดจำ 50% ของค่าบริการทั้งหมด ชำระหลังจากทำการจอง</p>
+        <p>2) ค่าบริการส่วนที่เหลือ 50% ชำระตามกำหนดของที่พัก</p>
+      </div>
       <button
         type="submit"
         disabled={loading}
@@ -152,4 +187,21 @@ export function BookingForm({
       </button>
     </form>
   )
+}
+
+function getNights(checkIn: string, checkOut: string): number {
+  if (!checkIn || !checkOut) return 0
+  const inDate = parseLocalDate(checkIn)
+  const outDate = parseLocalDate(checkOut)
+  if (!inDate || !outDate) return 0
+  const diffMs = outDate.getTime() - inDate.getTime()
+  const days = Math.round(diffMs / (1000 * 60 * 60 * 24))
+  return days > 0 ? days : 0
+}
+
+function parseLocalDate(value: string): Date | null {
+  const parts = value.split('-').map((s) => Number(s))
+  if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return null
+  const [year, month, day] = parts
+  return new Date(year, month - 1, day)
 }

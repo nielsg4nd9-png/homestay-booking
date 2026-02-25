@@ -18,6 +18,7 @@ function amenityString(amenities: string | null): string {
 export function RoomForm({ room }: { room?: Room | null }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [name, setName] = useState(room?.name ?? '')
@@ -36,6 +37,38 @@ export function RoomForm({ room }: { room?: Room | null }) {
       .replace(/[^a-z0-9ก-๙\-]/g, '')
     if (s) setSlug(s)
   }, [name, room])
+
+  async function handleImageUpload(file: File | undefined) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น')
+      return
+    }
+    const maxBytes = 2 * 1024 * 1024
+    if (file.size > maxBytes) {
+      setError('รูปภาพต้องมีขนาดไม่เกิน 2MB')
+      return
+    }
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'อัปโหลดรูปไม่สำเร็จ')
+        return
+      }
+      setImageUrl(data.url || '')
+    } catch {
+      setError('อัปโหลดรูปไม่สำเร็จ')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -145,7 +178,43 @@ export function RoomForm({ room }: { room?: Room | null }) {
           placeholder="https://..."
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
         />
+        <p className="mt-1 text-xs text-gray-500">วาง URL รูป หรืออัปโหลดไฟล์รูปจากเครื่องด้านล่าง</p>
       </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">อัปโหลดรูปภาพ</label>
+        <input
+          type="file"
+          accept="image/*"
+          disabled={uploadingImage}
+          onChange={async (e) => {
+            setError(null)
+            try {
+              await handleImageUpload(e.target.files?.[0])
+            } catch {
+              setError('ไม่สามารถอ่านไฟล์รูปภาพได้')
+            }
+          }}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-emerald-700 hover:file:bg-emerald-100"
+        />
+        {uploadingImage && (
+          <p className="mt-1 text-xs text-emerald-700">กำลังอัปโหลดรูปภาพ...</p>
+        )}
+      </div>
+      {imageUrl && (
+        <div className="rounded-lg border border-gray-200 p-2">
+          <p className="text-xs text-gray-500 mb-2">พรีวิวรูปภาพ</p>
+          <img src={imageUrl} alt="preview" className="w-full max-h-56 object-cover rounded-md" />
+        </div>
+      )}
+      {imageUrl && (
+        <button
+          type="button"
+          onClick={() => setImageUrl('')}
+          className="text-sm text-red-600 hover:text-red-700 underline"
+        >
+          ลบรูปภาพที่เลือก
+        </button>
+      )}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">สิ่งอำนวยความสะดวก (คั่นด้วย comma)</label>
         <input
@@ -159,7 +228,7 @@ export function RoomForm({ room }: { room?: Room | null }) {
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || uploadingImage}
           className="py-2.5 px-5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition"
         >
           {loading ? 'กำลังบันทึก...' : room ? 'อัปเดต' : 'เพิ่มห้อง'}
