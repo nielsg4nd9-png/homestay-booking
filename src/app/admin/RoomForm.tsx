@@ -27,7 +27,7 @@ export function RoomForm({ room }: { room?: Room | null }) {
   const [pricePerNight, setPricePerNight] = useState(room?.pricePerNight?.toString() ?? '')
   const [maxGuests, setMaxGuests] = useState(room?.maxGuests?.toString() ?? '2')
   const [imageUrl, setImageUrl] = useState(room?.imageUrl ?? '')
-  const [amenitiesText, setAmenitiesText] = useState(amenityString(room?.amenities))
+  const [amenitiesText, setAmenitiesText] = useState(amenityString(room?.amenities ?? null))
 
   useEffect(() => {
     if (room) return

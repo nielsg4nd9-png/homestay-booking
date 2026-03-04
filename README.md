@@ -1,6 +1,6 @@
 # ระบบจองห้องพักโฮมสเตย์
 
-เว็บแอป Next.js + Prisma (SQLite) สำหรับจองห้องพักโฮมสเตย์
+เว็บแอป Next.js + Prisma (PostgreSQL) สำหรับจองห้องพักโฮมสเตย์
 
 ## สิ่งที่มีในระบบ
 
@@ -21,9 +21,16 @@ npm run dev
 
 ## ฐานข้อมูล
 
-- ใช้ SQLite ไฟล์ `prisma/dev.db`
+- ใช้ PostgreSQL (รองรับ Vercel, Neon, Supabase, Docker)
+- ตั้งค่า `DATABASE_URL` ใน `.env` ตาม `.env.example`
 - สร้างตาราง: `npm run db:push`
 - ใส่ข้อมูลตัวอย่าง: `npm run db:seed`
+
+## การ Deploy
+
+- **Vercel:** ดู [docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md) (ตั้งค่า Postgres + Vercel Blob)
+- **รันด้วย Node:** `npm run build` แล้ว `npm run start` (ตั้งค่า env ตาม `.env.example`)
+- **รันด้วย Docker:** ดู [docs/DEPLOY.md](docs/DEPLOY.md) — รัน `npm run docker:build` แล้ว `npm run docker:up` (มี Postgres ใน compose)
 
 ## ขั้นตอนถัดไป (ถ้าต้องการ)
 

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+.next
+out
+build
+
+# Env (ใช้ค่าจาก runtime ไม่ copy .env เข้า image)
+.env
+.env.*
+!.env.example
+
+# Git / IDE
+.git
+.gitignore
+.cursor
+.vscode
+*.md
+!README.md
+
+# DB files (จะ mount เป็น volume แทน)
+prisma/*.db
+prisma/*.db-journal
+
+# Uploads (จะ mount เป็น volume แทน)
+public/uploads
+
+# Docs ไม่จำเป็นใน image
+docs
+*.txt
+# scripts (ยกเว้น entrypoint สำหรับ Docker)
+scripts/*
+!scripts/docker-entrypoint.sh

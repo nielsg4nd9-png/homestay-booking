@@ -1,0 +1,41 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://homestay:homestay@postgres:5432/homestay
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXT_PUBLIC_PAYMENT_BANK_NAME=${NEXT_PUBLIC_PAYMENT_BANK_NAME:-}
+      - NEXT_PUBLIC_PAYMENT_ACCOUNT_NAME=${NEXT_PUBLIC_PAYMENT_ACCOUNT_NAME:-}
+      - NEXT_PUBLIC_PAYMENT_ACCOUNT_NO=${NEXT_PUBLIC_PAYMENT_ACCOUNT_NO:-}
+      - NEXT_PUBLIC_PAYMENT_PROMPTPAY_NO=${NEXT_PUBLIC_PAYMENT_PROMPTPAY_NO:-}
+      - NEXT_PUBLIC_PAYMENT_QR_IMAGE_URL=${NEXT_PUBLIC_PAYMENT_QR_IMAGE_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - app-uploads:/app/public/uploads
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: homestay
+      POSTGRES_PASSWORD: homestay
+      POSTGRES_DB: homestay
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homestay"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  app-uploads:

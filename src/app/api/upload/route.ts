@@ -34,6 +34,17 @@ export async function POST(request: Request) {
     const ext = ALLOWED_TYPES[file.type]
     const fileName = `${Date.now()}-${randomUUID()}.${ext}`
 
+    // บน Vercel ใช้ Blob Storage (filesystem เป็น read-only)
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const { put } = await import('@vercel/blob')
+      const blob = await put(`uploads/${fileName}`, file, {
+        access: 'public',
+        addRandomSuffix: false,
+      })
+      return NextResponse.json({ url: blob.url })
+    }
+
+    // Local / Docker: เขียนลงโฟลเดอร์ public/uploads
     const uploadDir = path.join(process.cwd(), 'public', 'uploads')
     await mkdir(uploadDir, { recursive: true })
 
@@ -47,4 +58,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'อัปโหลดรูปไม่สำเร็จ' }, { status: 500 })
   }
 }
-
