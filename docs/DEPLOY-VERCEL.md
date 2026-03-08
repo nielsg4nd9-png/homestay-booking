@@ -18,7 +18,7 @@
 
 | ตัวแปร | ค่าตัวอย่าง | หมายเหตุ |
 |--------|-------------|----------|
-| `DATABASE_URL` | `postgresql://user:pass@host/db?sslmode=require` | บังคับ — ใช้ Postgres เท่านั้น |
+| `DATABASE_URL` | `postgresql://user:pass@host/db?sslmode=require&connect_timeout=15` | บังคับ — ใช้ Postgres; ถ้าใช้ **Neon** ต้องใช้ URL แบบ pooler และใส่ `sslmode=require&connect_timeout=15` |
 | `NEXTAUTH_SECRET` | สร้างด้วย `openssl rand -base64 32` | บังคับ |
 | `NEXTAUTH_URL` | `https://your-app.vercel.app` | บังคับ — ต้องตรง URL จริง ไม่มี `/` ท้าย |
 | `BLOB_READ_WRITE_TOKEN` | จาก Vercel Blob | บังคับถ้ามีอัปโหลดรูป |
@@ -126,7 +126,7 @@ npm run db:seed   # ถ้าต้องการข้อมูลตัวอ
 - **`Environment variable not found: DATABASE_URL`** → ยังไม่ได้ตั้ง `DATABASE_URL` ใน Environment Variables (หรือ scope ไม่รวม Production)
 - `relation "User" does not exist` → ยังไม่ได้รัน `prisma db push` ให้สร้างตารางใน Postgres
 - `Invalid \`url\`` → ยังไม่ได้ตั้งค่า NEXTAUTH_URL ให้ตรง URL จริง
-- `Can't reach database server` → DATABASE_URL ผิด หรือเครือข่าย/ไฟร์วอลล์บล็อก
+- **`Can't reach database server`** → ดู [ถ้าใช้ Neon และเจอ Can't reach database server](#ถ้าใช้-neon-และเจอ-cant-reach-database-server) ด้านล่าง หรือตรวจสอบเครือข่าย/ไฟร์วอลล์
 
 ### 2. ตรวจสอบ Environment Variables
 
@@ -158,3 +158,36 @@ npm run db:seed   # ถ้าต้องการข้อมูลตัวอ
 
 ถ้าได้ `{ "ok": true, "db": "ok" }` แปลว่าแอปและ DB เชื่อมต่อได้ปกติ  
 ถ้าได้ `{ "ok": true, "db": "error" }` แปลว่าแอปขึ้นแล้วแต่เชื่อม DB ไม่ได้ → ตรวจสอบ DATABASE_URL และว่ามีการรัน `prisma db push` แล้ว
+
+---
+
+## ถ้าใช้ Neon และเจอ Can't reach database server
+
+เมื่อ deploy บน **Vercel / AWS Lambda** และใช้ **Neon** เป็น Postgres มักเจอ `Can't reach database server at ... neon.tech`. ให้ตั้งค่า **DATABASE_URL** ดังนี้:
+
+### 1. ใช้ Connection แบบ Pooler (บังคับ)
+
+ใน Neon Console เลือก **Connection pooling** แล้วคัดลอก connection string ที่มี **-pooler** ใน host (เช่น `ep-xxx-pooler.us-east-1.aws.neon.tech`)
+
+### 2. ใส่ query parameters ใน URL (บังคับ)
+
+ต่อท้าย URL ด้วย **`?sslmode=require&connect_timeout=15`** (ถ้ามี `?` อยู่แล้วให้ใช้ `&` แทน)
+
+**ตัวอย่างที่ถูกต้อง:**
+
+```text
+postgresql://user:password@ep-damp-paper-aiaub34v-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&connect_timeout=15
+```
+
+- **sslmode=require** — Neon ต้องใช้ SSL
+- **connect_timeout=15** — ให้เวลา serverless (Lambda) เชื่อมต่อนานขึ้น ลดโอกาส timeout ตอน cold start
+
+### 3. ตรวจในแพลตฟอร์ม deploy
+
+ไปที่ **Settings** → **Environment Variables** → แก้ `DATABASE_URL` ให้เป็นรูปแบบด้านบน (มี `sslmode=require` และ `connect_timeout=15`) จากนั้น **Redeploy**
+
+### 4. ถ้ายังเชื่อมไม่ได้ (โดยเฉพาะบน AWS Lambda)
+
+- **ตรวจว่า Lambda ออกเน็ตได้** — ถ้า Lambda อยู่ใน VPC ที่ไม่มี NAT Gateway / outbound internet จะเชื่อม Neon ไม่ได้ ต้องเปิด outbound หรือเอา Lambda ออกจาก VPC
+- **ลอง deploy บน Vercel** — Vercel มักเชื่อม Neon ได้เสถียรกว่า Lambda
+- **ลองเพิ่ม connect_timeout** — ใส่ `connect_timeout=30` แทน 15 แล้ว Redeploy

@@ -3,6 +3,7 @@ import { Prompt } from 'next/font/google'
 import { getServerSession } from 'next-auth'
 import { AuthProvider } from '@/components/AuthProvider'
 import { SiteHeader } from '@/components/SiteHeader'
+import { EnvSetupRequired } from '@/components/EnvSetupRequired'
 import { authOptions } from '@/lib/auth-options'
 import './globals.css'
 
@@ -18,16 +19,28 @@ export const metadata: Metadata = {
   description: 'ระบบจองห้องพักโฮมสเตย์ เลือกห้อง ตรวจสอบวันว่าง และจองออนไลน์',
 }
 
+/** ใน production ถ้ายังไม่มี env จำเป็น ให้แสดงหน้า setup แทนไม่ให้ crash */
+function isEnvMissing(): boolean {
+  if (process.env.NODE_ENV !== 'production') return false
+  const hasDb = !!process.env.DATABASE_URL?.trim()
+  const hasSecret = !!process.env.NEXTAUTH_SECRET?.trim()
+  return !hasDb || !hasSecret
+}
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  if (isEnvMissing()) {
+    return <EnvSetupRequired />
+  }
+
   let session = null
   try {
     session = await getServerSession(authOptions)
   } catch (_) {
-    // NEXTAUTH_SECRET/NEXTAUTH_URL missing or DB error — แสดงหน้าได้แต่ไม่มี session
+    // NEXTAUTH_URL missing or DB error — แสดงหน้าได้แต่ไม่มี session
   }
   const role = (session?.user as { role?: string })?.role
   const showBackOffice = session && (role === 'ADMIN' || role === 'EMPLOYEE')
