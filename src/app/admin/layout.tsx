@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-options'
 import { AdminSignOutButton } from './AdminSignOutButton'
 
 export default async function AdminLayout({

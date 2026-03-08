@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-options'
 import { AdminPageContainer, AdminPageHeader, AdminTableCard } from '@/components/admin/AdminUI'
 
 export const dynamic = 'force-dynamic'

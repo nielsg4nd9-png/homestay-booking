@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { formatPrice, parseAmenities } from '@/lib/utils'
 import { BookingForm } from './BookingForm'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-options'
 import { RoomImage } from '@/components/RoomImage'
 
 export const dynamic = 'force-dynamic'

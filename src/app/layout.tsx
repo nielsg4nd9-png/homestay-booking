@@ -3,7 +3,7 @@ import { Prompt } from 'next/font/google'
 import { getServerSession } from 'next-auth'
 import { AuthProvider } from '@/components/AuthProvider'
 import { SiteHeader } from '@/components/SiteHeader'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-options'
 import './globals.css'
 
 const prompt = Prompt({
