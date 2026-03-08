@@ -15,7 +15,12 @@ function isEnvConfigError(error: unknown): boolean {
 
 function isDbReachError(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error)
-  return /reach database server|connect to database/i.test(msg)
+  const code = error && typeof error === 'object' && 'code' in error ? (error as { code?: string }).code : ''
+  return (
+    code === 'P1000' ||
+    /Authentication failed|credentials.*not valid/i.test(msg) ||
+    /reach database server|connect to database/i.test(msg)
+  )
 }
 
 export default function GlobalError({
@@ -31,6 +36,8 @@ export default function GlobalError({
 
   const showEnvHelp = isEnvConfigError(error)
   const showDbReachHelp = isDbReachError(error)
+  const isAuthError =
+    error && typeof error === 'object' && 'code' in error && (error as { code?: string }).code === 'P1000'
 
   return (
     <html lang="th">
@@ -57,18 +64,33 @@ export default function GlobalError({
           </>
         ) : showDbReachHelp ? (
           <>
-            <p style={{ marginBottom: '1rem' }}>
-              Serverless (Vercel/AWS Lambda) เชื่อมต่อ Postgres ไม่ได้ มักเกิดกับ <strong>Neon</strong> ถ้าใช้ Neon ให้แก้ <strong>DATABASE_URL</strong> ดังนี้:
-            </p>
-            <ul style={{ marginBottom: '1rem', paddingLeft: '1.5rem' }}>
-              <li>ใช้ connection แบบ <strong>Pooler</strong> (host มี <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>-pooler</code>)</li>
-              <li>ต่อท้าย URL ด้วย <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>?sslmode=require&amp;connect_timeout=15</code></li>
-            </ul>
-            <p style={{ marginBottom: '1rem' }}>
-              ตัวอย่าง: <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4, fontSize: '0.875rem', wordBreak: 'break-all' }}>postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/db?sslmode=require&amp;connect_timeout=15</code>
-            </p>
+            {isAuthError ? (
+              <>
+                <p style={{ marginBottom: '1rem' }}>
+                  <strong>Authentication failed (P1000)</strong> — รหัสผ่านหรือ user ใน <strong>DATABASE_URL</strong> ไม่ถูกต้อง
+                </p>
+                <ul style={{ marginBottom: '1rem', paddingLeft: '1.5rem' }}>
+                  <li>ไปที่ Neon Console → โปรเจกต์ → <strong>Connection string</strong> แล้วคัดลอกใหม่ (ใช้ Pooler)</li>
+                  <li>ถ้ารหัสผ่านมีอักขระพิเศษ (เช่น <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>@ # : / ?</code>) ต้อง <strong>URL-encode</strong> (เช่น <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>@</code> → <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>%40</code>)</li>
+                  <li>อัปเดต <strong>DATABASE_URL</strong> ใน Vercel/AWS → Environment Variables แล้ว <strong>Redeploy</strong></li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <p style={{ marginBottom: '1rem' }}>
+                  Serverless (Vercel/AWS Lambda) เชื่อมต่อ Postgres ไม่ได้ มักเกิดกับ <strong>Neon</strong> ถ้าใช้ Neon ให้แก้ <strong>DATABASE_URL</strong> ดังนี้:
+                </p>
+                <ul style={{ marginBottom: '1rem', paddingLeft: '1.5rem' }}>
+                  <li>ใช้ connection แบบ <strong>Pooler</strong> (host มี <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>-pooler</code>)</li>
+                  <li>ต่อท้าย URL ด้วย <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4 }}>?sslmode=require&amp;connect_timeout=15</code></li>
+                </ul>
+                <p style={{ marginBottom: '1rem' }}>
+                  ตัวอย่าง: <code style={{ background: '#f1f5f9', padding: '0.2em 0.4em', borderRadius: 4, fontSize: '0.875rem', wordBreak: 'break-all' }}>postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/db?sslmode=require&amp;connect_timeout=15</code>
+                </p>
+              </>
+            )}
             <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
-              ดูรายละเอียดใน repo: <strong>docs/DEPLOY-VERCEL.md</strong> หัวข้อ “ถ้าใช้ Neon และเจอ Can not reach database server”
+              ดูรายละเอียดใน repo: <strong>docs/DEPLOY-VERCEL.md</strong>
             </p>
           </>
         ) : (

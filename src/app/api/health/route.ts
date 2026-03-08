@@ -14,7 +14,9 @@ export async function GET() {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     const code = e && typeof e === 'object' && 'code' in e ? (e as { code?: string }).code : ''
-    if (code === 'P1001' || /Can't reach database server/i.test(msg)) {
+    if (code === 'P1000' || /Authentication failed|credentials.*not valid/i.test(msg)) {
+      hint = 'รหัสผ่านหรือ user ใน DATABASE_URL ไม่ถูกต้อง: ตรวจสอบใน Neon Console ว่า connection string ถูกต้อง และถ้ารหัสผ่านมีอักขระพิเศษ (เช่น @, #, :) ต้อง URL-encode'
+    } else if (code === 'P1001' || /Can't reach database server/i.test(msg)) {
       hint = 'เชื่อมต่อ DB ไม่ได้: ตรวจสอบ DATABASE_URL ว่าถูกต้อง และถ้าใช้ Neon ต้องมี ?sslmode=require&connect_timeout=15 และใช้ host แบบ -pooler'
     } else if (/Environment variable not found: DATABASE_URL/i.test(msg)) {
       hint = 'ยังไม่ได้ตั้งค่า DATABASE_URL ใน Environment Variables ของ Vercel'

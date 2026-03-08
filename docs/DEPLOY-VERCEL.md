@@ -186,7 +186,17 @@ postgresql://user:password@ep-damp-paper-aiaub34v-pooler.us-east-1.aws.neon.tech
 
 ไปที่ **Settings** → **Environment Variables** → แก้ `DATABASE_URL` ให้เป็นรูปแบบด้านบน (มี `sslmode=require` และ `connect_timeout=15`) จากนั้น **Redeploy**
 
-### 4. ถ้ายังเชื่อมไม่ได้ (โดยเฉพาะบน AWS Lambda)
+### 4. เจอ P1000 / Authentication failed (รหัสผ่านไม่ถูกต้อง)
+
+ถ้า error ขึ้น **Authentication failed** หรือ **credentials are not valid** (รหัส P1000):
+
+- **คัดลอก connection string ใหม่** จาก Neon Console → โปรเจกต์ → Connect → เปิด Connection pooling → Copy
+- **รหัสผ่านมีอักขระพิเศษ** (เช่น `@ # : / ? & =`) ต้อง **URL-encode** ก่อนใส่ใน DATABASE_URL  
+  ตัวอย่าง: `@` → `%40` , `#` → `%23` , `:` → `%3A`  
+  หรือใน Neon Console ใช้ **Reset password** สร้างรหัสใหม่ที่ไม่มีอักขระพิเศษ
+- อัปเดต **DATABASE_URL** ใน Vercel/AWS → Environment Variables แล้ว **Redeploy**
+
+### 5. ถ้ายังเชื่อมไม่ได้ (โดยเฉพาะบน AWS Lambda)
 
 - **ตรวจว่า Lambda ออกเน็ตได้** — ถ้า Lambda อยู่ใน VPC ที่ไม่มี NAT Gateway / outbound internet จะเชื่อม Neon ไม่ได้ ต้องเปิด outbound หรือเอา Lambda ออกจาก VPC
 - **ลอง deploy บน Vercel** — Vercel มักเชื่อม Neon ได้เสถียรกว่า Lambda
