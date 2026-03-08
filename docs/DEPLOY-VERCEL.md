@@ -1,6 +1,6 @@
 # Deploy บน Vercel
 
-โปรเจกต์นี้ใช้ **PostgreSQL** และ **Vercel Blob** สำหรับอัปโหลดรูป จึงพร้อม deploy บน Vercel โดยไม่ต้องแก้โค้ดเพิ่ม
+โปรเจกต์นี้บน Vercel จะใช้ **PostgreSQL** และ **Vercel Blob** อัตโนมัติ (local dev ใช้ SQLite ตามเดิม)
 
 ---
 

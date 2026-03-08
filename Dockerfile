@@ -3,11 +3,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+# ใช้ PostgreSQL schema ตอน build (postinstall ดู DATABASE_URL)
+ENV DATABASE_URL=postgresql://homestay:homestay@postgres:5432/homestay
 
+COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN npm ci
 
 COPY . .
 ENV DOCKER_BUILD=1

@@ -1,6 +1,6 @@
 # ระบบจองห้องพักโฮมสเตย์
 
-เว็บแอป Next.js + Prisma (PostgreSQL) สำหรับจองห้องพักโฮมสเตย์
+เว็บแอป Next.js + Prisma สำหรับจองห้องพักโฮมสเตย์ (local ใช้ SQLite, deploy ใช้ PostgreSQL)
 
 ## สิ่งที่มีในระบบ
 
@@ -21,8 +21,8 @@ npm run dev
 
 ## ฐานข้อมูล
 
-- ใช้ PostgreSQL (รองรับ Vercel, Neon, Supabase, Docker)
-- ตั้งค่า `DATABASE_URL` ใน `.env` ตาม `.env.example`
+- **SQLite (default):** ใส่ `DATABASE_URL="file:./dev.db"` ใน `.env` — รัน `npm run dev` ได้เลย
+- **PostgreSQL (local หรือ deploy):** ใส่ `DATABASE_URL="postgresql://user:pass@host:5432/db"` ใน `.env` แล้วรัน `npm install` (หรือ `node scripts/prisma-schema-select.cjs && npx prisma generate`) เพื่อสลับ schema
 - สร้างตาราง: `npm run db:push`
 - ใส่ข้อมูลตัวอย่าง: `npm run db:seed`
 
