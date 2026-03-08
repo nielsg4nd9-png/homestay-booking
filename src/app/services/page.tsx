@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RoomImage } from '@/components/RoomImage'
 import { formatPrice } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'สินค้าและบริการ | บ้านสวนโฮมสเตย์',
   description:

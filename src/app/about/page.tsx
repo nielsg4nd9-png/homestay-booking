@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RoomImage } from '@/components/RoomImage'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'เกี่ยวกับเรา | บ้านสวนโฮมสเตย์',
   description: 'ข้อมูลเกี่ยวกับ กาแฟ บ้านสวน โฮมสเตย์ Ban Suan Homestay and Coffee (Mae La Noi)',

@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/card'
 import { formatPrice } from '@/lib/utils'
 import { DepositSlipUploader } from './DepositSlipUploader'
- 
+
+export const dynamic = 'force-dynamic'
+
 export default async function BookingCheckPage() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) {

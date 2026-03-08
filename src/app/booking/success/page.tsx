@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/card'
 import { formatPrice } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function BookingSuccessPage({
   searchParams,
 }: {
