@@ -163,7 +163,7 @@ npm run db:seed   # ถ้าต้องการข้อมูลตัวอ
 
 ## ถ้าใช้ Neon และเจอ Can't reach database server
 
-เมื่อ deploy บน **Vercel / AWS Lambda** และใช้ **Neon** เป็น Postgres มักเจอ `Can't reach database server at ... neon.tech`. ให้ตั้งค่า **DATABASE_URL** ดังนี้:
+โปรเจกต์นี้ใช้ **Prisma 6** และเมื่อ deploy บน **Vercel หรือ AWS Lambda** กับ **Neon** จะใช้ **Neon serverless driver** อัตโนมัติ (เชื่อมผ่าน WebSocket แทน TCP) เพื่อลดปัญหา "Can't reach database server" ถ้ายังเจอ error ให้ตั้งค่า **DATABASE_URL** ดังนี้:
 
 ### 1. ใช้ Connection แบบ Pooler (บังคับ)
 
