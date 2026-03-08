@@ -20,7 +20,7 @@ cp .env.example .env
 
 **Deploy บน Vercel:** ดู [docs/DEPLOY-VERCEL.md](DEPLOY-VERCEL.md)
 
-**ใช้ PostgreSQL บน local:** ใส่ `DATABASE_URL="postgresql://..."` ใน `.env` (เช่น จาก Docker `postgres` หรือ Neon) แล้วรัน `npm install` เพื่อสลับ schema หลังจากนั้นรัน `npm run db:push` และ `npm run dev` ตามปกติ
+โปรเจกต์ใช้ **PostgreSQL เท่านั้น** — local ใส่ `DATABASE_URL="postgresql://..."` ใน `.env` (Neon / Docker postgres) แล้วรัน `npm run db:push` และ `npm run dev` ตามปกติ
 
 ---
 

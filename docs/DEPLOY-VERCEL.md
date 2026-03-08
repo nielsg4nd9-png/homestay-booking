@@ -1,6 +1,6 @@
 # Deploy บน Vercel
 
-โปรเจกต์นี้ใช้ **Next.js 14** และบน Vercel จะใช้ **PostgreSQL** และ **Vercel Blob** อัตโนมัติ (local dev ใช้ SQLite ตามเดิม)
+โปรเจกต์นี้ใช้ **Next.js 14** และ **PostgreSQL เท่านั้น** (เช่น Neon, Vercel Postgres) ทั้ง local และ deploy บน Vercel; อัปโหลดรูปใช้ **Vercel Blob**
 
 ถ้า deploy บน **AWS (SST/OpenNext)** หรือ serverless อื่นที่ใช้ OpenNext: โปรเจกต์อัปเกรดเป็น Next.js 14 แล้ว เพื่อแก้ error `Cannot find module page_client-reference-manifest.js` ที่เกิดกับ Next 13 บน OpenNext
 

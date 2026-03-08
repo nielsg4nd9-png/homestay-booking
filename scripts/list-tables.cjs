@@ -3,7 +3,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   const tables = await prisma.$queryRawUnsafe(
-    "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+    "SELECT tablename AS name FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename"
   )
   console.log('ตารางในฐานข้อมูล:', tables.map((t) => t.name).join(', '))
   const count = await prisma.user.count()
