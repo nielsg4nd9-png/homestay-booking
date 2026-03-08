@@ -6,6 +6,25 @@
 
 ---
 
+## ⚠️ บังคับ: ตั้งค่า Environment Variables ก่อน deploy
+
+ถ้า**ยังไม่ตั้งค่า**ตัวแปรด้านล่างบนแพลตฟอร์มที่ deploy (Vercel / AWS / อื่นๆ) เว็บจะขึ้น error เช่น:
+
+- **`[next-auth][error][NO_SECRET]`** / **`Please define a secret in production`** → ยังไม่ได้ตั้ง `NEXTAUTH_SECRET`
+- **`Environment variable not found: DATABASE_URL`** → ยังไม่ได้ตั้ง `DATABASE_URL`
+
+**ต้องทำก่อน:** ไปที่โปรเจกต์ใน Vercel (หรือ AWS/แพลตฟอร์มที่ใช้) → **Settings** → **Environment Variables** → เพิ่มตัวแปรด้านล่างให้ครบ และเลือก Environment เป็น **Production** (และ Preview ถ้าใช้) จากนั้น **Redeploy**  
+ถ้าใช้ **AWS (SST/OpenNext)** ให้ใส่ตัวแปรเดียวกันใน config ของ SST/Lambda environment
+
+| ตัวแปร | ค่าตัวอย่าง | หมายเหตุ |
+|--------|-------------|----------|
+| `DATABASE_URL` | `postgresql://user:pass@host/db?sslmode=require` | บังคับ — ใช้ Postgres เท่านั้น |
+| `NEXTAUTH_SECRET` | สร้างด้วย `openssl rand -base64 32` | บังคับ |
+| `NEXTAUTH_URL` | `https://your-app.vercel.app` | บังคับ — ต้องตรง URL จริง ไม่มี `/` ท้าย |
+| `BLOB_READ_WRITE_TOKEN` | จาก Vercel Blob | บังคับถ้ามีอัปโหลดรูป |
+
+---
+
 ## 1. เตรียมฐานข้อมูล PostgreSQL
 
 Vercel ไม่รองรับ SQLite ต้องใช้ PostgreSQL จากบริการใดบริการหนึ่ง:
@@ -103,8 +122,10 @@ npm run db:seed   # ถ้าต้องการข้อมูลตัวอ
 3. ไปที่แท็บ **Functions** หรือ **Runtime Logs** (หรือ **Logs**) แล้วดู error message
 
 มักจะเห็นข้อความเช่น:
+- **`NO_SECRET`** / **`Please define a secret in production`** → ยังไม่ได้ตั้ง `NEXTAUTH_SECRET` ใน Environment Variables
+- **`Environment variable not found: DATABASE_URL`** → ยังไม่ได้ตั้ง `DATABASE_URL` ใน Environment Variables (หรือ scope ไม่รวม Production)
 - `relation "User" does not exist` → ยังไม่ได้รัน `prisma db push` ให้สร้างตารางใน Postgres
-- `NEXTAUTH_SECRET` / `Invalid `url`` → ยังไม่ได้ตั้งค่า NEXTAUTH_SECRET หรือ NEXTAUTH_URL
+- `Invalid \`url\`` → ยังไม่ได้ตั้งค่า NEXTAUTH_URL ให้ตรง URL จริง
 - `Can't reach database server` → DATABASE_URL ผิด หรือเครือข่าย/ไฟร์วอลล์บล็อก
 
 ### 2. ตรวจสอบ Environment Variables
