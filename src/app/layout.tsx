@@ -23,7 +23,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getServerSession(authOptions)
+  let session = null
+  try {
+    session = await getServerSession(authOptions)
+  } catch (_) {
+    // NEXTAUTH_SECRET/NEXTAUTH_URL missing or DB error — แสดงหน้าได้แต่ไม่มี session
+  }
   const role = (session?.user as { role?: string })?.role
   const showBackOffice = session && (role === 'ADMIN' || role === 'EMPLOYEE')
   const headerUser = session?.user

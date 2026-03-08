@@ -87,3 +87,51 @@ npm run db:seed   # ถ้าต้องการข้อมูลตัวอ
 | `NEXT_PUBLIC_PAYMENT_*` | ไม่บังคับ |
 
 ถ้าไม่ใส่ `BLOB_READ_WRITE_TOKEN` หน้า upload รูปจะ error เพราะบน Vercel ไม่สามารถเขียนไฟล์ลง disk ได้
+
+---
+
+## แก้ไขเมื่อเจอ 500 Internal Server Error
+
+ถ้าเปิดเว็บแล้วขึ้น **500 Internal Server Error** ให้ตรวจตามนี้:
+
+### 1. ดู error จริงจาก Vercel
+
+1. ไปที่ Vercel Dashboard > เลือกโปรเจกต์
+2. เปิด **Deployments** > คลิก deployment ล่าสุด
+3. ไปที่แท็บ **Functions** หรือ **Runtime Logs** (หรือ **Logs**) แล้วดู error message
+
+มักจะเห็นข้อความเช่น:
+- `relation "User" does not exist` → ยังไม่ได้รัน `prisma db push` ให้สร้างตารางใน Postgres
+- `NEXTAUTH_SECRET` / `Invalid `url`` → ยังไม่ได้ตั้งค่า NEXTAUTH_SECRET หรือ NEXTAUTH_URL
+- `Can't reach database server` → DATABASE_URL ผิด หรือเครือข่าย/ไฟร์วอลล์บล็อก
+
+### 2. ตรวจสอบ Environment Variables
+
+ใน **Settings** > **Environment Variables** ต้องมีครบ (และเลือก scope **Production**):
+
+- `DATABASE_URL` = connection string ของ PostgreSQL (ขึ้นต้นด้วย `postgresql://` หรือ `postgres://`)
+- `NEXTAUTH_SECRET` = สร้างด้วย `openssl rand -base64 32`
+- `NEXTAUTH_URL` = URL จริงของเว็บ เช่น `https://your-project.vercel.app` (ไม่มี slash ท้าย)
+
+หลังแก้ env ให้ **Redeploy** (Deployments > ... > Redeploy) เพื่อให้ค่าใหม่มีผล
+
+### 3. สร้างตารางในฐานข้อมูล (สำคัญมาก)
+
+ถ้ายังไม่เคยรัน migration บน Postgres ที่ใช้กับ Vercel:
+
+```bash
+# ในเครื่องตัวเอง ใส่ .env ให้ DATABASE_URL ชี้ไปที่ Postgres ตัวเดียวกับที่ Vercel ใช้
+npx prisma db push
+npm run db:seed   # ถ้าต้องการข้อมูลตัวอย่าง
+```
+
+ถ้าข้ามขั้นตอนนี้ หน้าแรกหรือทุกหน้าที่เรียก Prisma จะ error 500 เพราะยังไม่มีตาราง
+
+### 4. ทดสอบว่าแอปและ DB ทำงาน
+
+เปิดในเบราว์เซอร์:
+
+- `https://your-project.vercel.app/api/health`
+
+ถ้าได้ `{ "ok": true, "db": "ok" }` แปลว่าแอปและ DB เชื่อมต่อได้ปกติ  
+ถ้าได้ `{ "ok": true, "db": "error" }` แปลว่าแอปขึ้นแล้วแต่เชื่อม DB ไม่ได้ → ตรวจสอบ DATABASE_URL และว่ามีการรัน `prisma db push` แล้ว
